@@ -1,0 +1,2627 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GATE DA 2026 Study Planner</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fortawesome/fontawesome-free@6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #4F46E5;
+            --primary-dark: #4338CA;
+            --secondary: #06B6D4;
+            --bg-light: #F9FAFB;
+            --text-dark: #1F2937;
+            --text-light: #F9FAFB;
+            --sidebar-width: 250px;
+            --sidebar-width-collapsed: 60px;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            color: var(--text-dark);
+            background-color: var(--bg-light);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+        
+        /* Scrollbar styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: var(--sidebar-width);
+            height: 100vh;
+            background-color: var(--primary);
+            color: var(--text-light);
+            transition: all 0.3s ease;
+            z-index: 100;
+            overflow-y: auto;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .sidebar.collapsed {
+            width: var(--sidebar-width-collapsed);
+        }
+        
+        .sidebar-header {
+            padding: 1.5rem 1rem;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            transition: opacity 0.3s ease;
+        }
+        
+        .sidebar.collapsed .logo {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
+        
+        .toggle-btn {
+            background: transparent;
+            border: none;
+            color: var(--text-light);
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+        
+        .sidebar-menu {
+            padding: 1rem 0;
+        }
+        
+        .menu-item {
+            padding: 0.75rem 1.5rem;
+            display: flex;
+            align-items: center;
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            transition: all 0.2s ease;
+            cursor: pointer;
+        }
+        
+        .menu-item:hover, .menu-item.active {
+            background-color: var(--primary-dark);
+            color: white;
+        }
+        
+        .menu-item i {
+            margin-right: 0.75rem;
+            width: 20px;
+            text-align: center;
+        }
+        
+        .sidebar.collapsed .menu-text {
+            opacity: 0;
+            width: 0;
+            height: 0;
+            overflow: hidden;
+        }
+        
+        .content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            transition: margin-left 0.3s ease;
+        }
+        
+        .content.expanded {
+            margin-left: var(--sidebar-width-collapsed);
+        }
+        
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+        
+        .section.active {
+            display: block;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+            padding: 1.5rem;
+            margin-bottom: 1.5rem;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-bottom: 1.5rem;
+            color: var(--primary);
+            border-bottom: 2px solid var(--primary);
+            padding-bottom: 0.5rem;
+            display: inline-block;
+        }
+        
+        .progress-container {
+            width: 100%;
+            height: 8px;
+            background-color: #e9ecef;
+            border-radius: 4px;
+            margin: 0.5rem 0;
+        }
+        
+        .progress-bar {
+            height: 100%;
+            background-color: var(--primary);
+            border-radius: 4px;
+            transition: width 0.3s ease;
+        }
+        
+        .back-to-top {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: var(--primary);
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            z-index: 99;
+        }
+        
+        .back-to-top.visible {
+            opacity: 1;
+        }
+        
+        /* Timetable styling */
+        .timetable {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 1rem 0;
+        }
+        
+        .timetable th, .timetable td {
+            border: 1px solid #e5e7eb;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .timetable th {
+            background-color: #f3f4f6;
+        }
+        
+        .timetable tr:nth-child(even) {
+            background-color: #f9fafb;
+        }
+        
+        /* Accordion styling */
+        .accordion {
+            margin-bottom: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            overflow: hidden;
+        }
+        
+        .accordion-header {
+            padding: 1rem;
+            background-color: #f3f4f6;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-weight: 600;
+        }
+        
+        .accordion-content {
+            padding: 0;
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease;
+        }
+        
+        .accordion-content.active {
+            padding: 1rem;
+            max-height: 1000px;
+        }
+        
+        /* Resource cards */
+        .resource-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        
+        .resource-card {
+            background: white;
+            border-radius: 0.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            padding: 1rem;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .resource-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .resource-card h4 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+            color: var(--primary);
+        }
+        
+        .resource-card a {
+            color: var(--secondary);
+            text-decoration: none;
+            display: block;
+            margin-top: 0.5rem;
+        }
+        
+        .resource-card a:hover {
+            text-decoration: underline;
+        }
+        
+        /* Tracker styling */
+        .tracker-tools {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .tracker-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        
+        .tracker-table th, .tracker-table td {
+            border: 1px solid #e5e7eb;
+            padding: 0.75rem;
+            text-align: left;
+        }
+        
+        .tracker-table th {
+            background-color: #f3f4f6;
+        }
+        
+        .tracker-subject {
+            font-weight: 600;
+            background-color: #f3f4f6;
+        }
+        
+        /* Notes styling */
+        .notes-container {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .notes-selector {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 1rem;
+            flex-wrap: wrap;
+        }
+        
+        .notes-editor {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .notes-textarea {
+            width: 100%;
+            min-height: 300px;
+            padding: 1rem;
+            border: 1px solid #e5e7eb;
+            border-radius: 0.5rem;
+            resize: vertical;
+        }
+        
+        /* Calendar styling */
+        .calendar-container {
+            width: 100%;
+            overflow: hidden;
+        }
+        
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+        
+        .calendar-day {
+            border: 1px solid #e5e7eb;
+            border-radius: 0.25rem;
+            padding: 0.5rem;
+            min-height: 80px;
+            background-color: white;
+        }
+        
+        .calendar-day.today {
+            background-color: #f0f9ff;
+            border-color: var(--primary);
+        }
+        
+        .calendar-day.different-month {
+            background-color: #f9fafb;
+            color: #9ca3af;
+        }
+        
+        .calendar-day-header {
+            font-weight: 600;
+            margin-bottom: 0.25rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .calendar-day-content {
+            font-size: 0.75rem;
+            overflow: hidden;
+        }
+        
+        .calendar-event {
+            background-color: #e0f2fe;
+            border-radius: 0.25rem;
+            padding: 0.25rem;
+            margin-bottom: 0.25rem;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+        
+        .calendar-event.phase-1 {
+            background-color: #e0f2fe;
+        }
+        
+        .calendar-event.phase-2 {
+            background-color: #dcfce7;
+        }
+        
+        .calendar-event.phase-3 {
+            background-color: #fef9c3;
+        }
+        
+        .calendar-event.phase-4 {
+            background-color: #fee2e2;
+        }
+        
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        
+        .weekday {
+            text-align: center;
+            font-weight: 600;
+            padding: 0.5rem;
+        }
+        
+        .task-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .task-modal.active {
+            display: flex;
+        }
+        
+        .task-modal-content {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 0.5rem;
+            width: 90%;
+            max-width: 500px;
+        }
+        
+        /* Hero section styling */
+        .hero {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            padding: 2rem;
+            border-radius: 0.5rem;
+            color: white;
+            margin-bottom: 2rem;
+        }
+        
+        .hero h2 {
+            font-size: 2rem;
+            font-weight: 700;
+            margin-bottom: 1rem;
+        }
+        
+        .hero p {
+            margin-bottom: 1rem;
+            max-width: 700px;
+        }
+        
+        .phase-card {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            padding: 1rem;
+            background-color: white;
+            border-radius: 0.5rem;
+            margin-bottom: 1rem;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+        }
+        
+        .phase-number {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background-color: var(--primary);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+        
+        @media (max-width: 768px) {
+            :root {
+                --sidebar-width: 200px;
+            }
+            
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.mobile-active {
+                transform: translateX(0);
+            }
+            
+            .content {
+                margin-left: 0;
+            }
+            
+            .content.expanded {
+                margin-left: 0;
+            }
+            
+            .mobile-toggle {
+                display: block;
+                position: fixed;
+                top: 1rem;
+                left: 1rem;
+                z-index: 101;
+                background-color: var(--primary);
+                color: white;
+                width: 40px;
+                height: 40px;
+                border-radius: 50%;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                cursor: pointer;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            }
+            
+            .resource-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Mobile Toggle Button -->
+    <div class="mobile-toggle" id="mobileToggle">
+        <i class="fas fa-bars"></i>
+    </div>
+    
+    <!-- Sidebar Navigation -->
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">GATE DA 2026</div>
+            <button class="toggle-btn" id="toggleSidebar">
+                <i class="fas fa-angle-left"></i>
+            </button>
+        </div>
+        <div class="sidebar-menu">
+            <div class="menu-item active" data-section="home">
+                <i class="fas fa-home"></i>
+                <span class="menu-text">Home</span>
+            </div>
+            <div class="menu-item" data-section="study-plan">
+                <i class="fas fa-book"></i>
+                <span class="menu-text">Study Plan</span>
+            </div>
+            <div class="menu-item" data-section="resources">
+                <i class="fas fa-link"></i>
+                <span class="menu-text">Resources</span>
+            </div>
+            <div class="menu-item" data-section="tracker">
+                <i class="fas fa-tasks"></i>
+                <span class="menu-text">Tracker</span>
+            </div>
+            <div class="menu-item" data-section="notes">
+                <i class="fas fa-sticky-note"></i>
+                <span class="menu-text">Notes</span>
+            </div>
+            <div class="menu-item" data-section="calendar">
+                <i class="fas fa-calendar-alt"></i>
+                <span class="menu-text">Calendar</span>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Main Content -->
+    <div class="content" id="content">
+        <!-- Home Section -->
+        <section class="section active" id="home">
+            <div class="hero">
+                <h2>GATE Data Science & AI 2026 Study Planner</h2>
+                <p>Welcome to your personalized study planner for GATE Data Science and Artificial Intelligence (DA) 2026. This comprehensive tool will help you organize your preparation, track your progress, and maximize your study efficiency.</p>
+                <p>Your journey starts in April 2025 and continues until the exam in February 2026. With the right strategy and consistent effort, you'll be well-prepared to excel in the exam and secure admission to top universities.</p>
+            </div>
+            
+            <div class="card">
+                <h3 class="section-title">About GATE DA</h3>
+                <p>The Graduate Aptitude Test in Engineering (GATE) for Data Science and Artificial Intelligence (DA) is a prestigious national-level examination in India that tests the comprehensive understanding of various undergraduate subjects in engineering and science for admission to postgraduate programs in Indian institutes.</p>
+                <p class="mt-4">The GATE DA paper assesses candidates on:</p>
+                <ul class="ml-6 mt-2 list-disc">
+                    <li>Probability and Statistics</li>
+                    <li>Linear Algebra</li>
+                    <li>Calculus and Optimization</li>
+                    <li>Programming, Data Structures and Algorithms</li>
+                    <li>Database Management and Warehousing</li>
+                    <li>Machine Learning</li>
+                    <li>Artificial Intelligence</li>
+                    <li>General Aptitude</li>
+                </ul>
+                
+                <div class="mt-6">
+                    <h4 class="font-bold text-lg">Exam Pattern:</h4>
+                    <ul class="ml-6 mt-2 list-disc">
+                        <li>Total Marks: 100</li>
+                        <li>Duration: 3 hours</li>
+                        <li>Question Types: Multiple Choice Questions (MCQs) and Numerical Answer Type (NAT)</li>
+                        <li>General Aptitude: 15% weightage</li>
+                        <li>Subject Questions: 85% weightage</li>
+                        <li>Negative Marking: For MCQs only (1/3 for 1-mark questions, 2/3 for 2-mark questions)</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h3 class="section-title">Your Preparation Journey</h3>
+                <p>This planner is specifically designed for a B.Tech student graduating in June 2025, with a job requiring 8.5 hours daily and a morning gym routine. Your preparation will be structured in four key phases:</p>
+                
+                <div class="phase-card">
+                    <div class="phase-number">1</div>
+                    <div>
+                        <h4 class="font-bold">Foundation Phase (April - June 2025)</h4>
+                        <p>Build a strong foundation in the mathematical subjects that underpin Data Science and AI.</p>
+                    </div>
+                </div>
+                
+                <div class="phase-card">
+                    <div class="phase-number">2</div>
+                    <div>
+                        <h4 class="font-bold">Programming & Database Phase (July - August 2025)</h4>
+                        <p>Leverage your existing Python and SQL knowledge while filling any gaps in these domains.</p>
+                    </div>
+                </div>
+                
+                <div class="phase-card">
+                    <div class="phase-number">3</div>
+                    <div>
+                        <h4 class="font-bold">Advanced Topics (September - December 2025)</h4>
+                        <p>Focus on the core Data Science and AI topics that constitute the majority of the exam.</p>
+                    </div>
+                </div>
+                
+                <div class="phase-card">
+                    <div class="phase-number">4</div>
+                    <div>
+                        <h4 class="font-bold">Revision & Mock Tests (January 2026)</h4>
+                        <p>Consolidate your knowledge and build exam temperament through intensive practice.</p>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <p>This planner includes:</p>
+                    <ul class="ml-6 mt-2 list-disc">
+                        <li>A daily schedule tailored to your constraints</li>
+                        <li>A subject-wise roadmap with hour allocations</li>
+                        <li>Curated free resources for each subject</li>
+                        <li>Progress tracking tools</li>
+                        <li>Note-taking functionality</li>
+                        <li>An interactive calendar</li>
+                    </ul>
+                </div>
+                
+                <p class="mt-6 font-semibold text-center text-primary">Your dedication today will shape your opportunities tomorrow!</p>
+            </div>
+        </section>
+        
+        <!-- Study Plan Section -->
+        <section class="section" id="study-plan">
+            <h3 class="section-title">Your Personalized Study Plan</h3>
+            
+            <div class="card">
+                <h4 class="font-bold text-lg mb-4">Daily Schedule</h4>
+                
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <span>Weekday Schedule</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <table class="timetable">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Activity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>5:00 AM - 6:00 AM</td>
+                                    <td>Wake up, freshen up</td>
+                                </tr>
+                                <tr>
+                                    <td>6:00 AM - 8:00 AM</td>
+                                    <td>Gym</td>
+                                </tr>
+                                <tr>
+                                    <td>8:00 AM - 9:00 AM</td>
+                                    <td>Breakfast, get ready</td>
+                                </tr>
+                                <tr>
+                                    <td>9:00 AM - 9:30 AM</td>
+                                    <td>Commute to work</td>
+                                </tr>
+                                <tr>
+                                    <td>9:30 AM - 6:00 PM</td>
+                                    <td>Work (8.5 hours including breaks)</td>
+                                </tr>
+                                <tr>
+                                    <td>6:00 PM - 8:30 PM</td>
+                                    <td>Commute back (arrive home by 8:30 PM)</td>
+                                </tr>
+                                <tr>
+                                    <td>8:30 PM - 9:00 PM</td>
+                                    <td>Dinner, relax</td>
+                                </tr>
+                                <tr>
+                                    <td>9:00 PM - 11:00 PM</td>
+                                    <td>Study (2 hours)</td>
+                                </tr>
+                                <tr>
+                                    <td>11:00 PM - 5:00 AM</td>
+                                    <td>Sleep</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Weekend Schedule</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <table class="timetable">
+                            <thead>
+                                <tr>
+                                    <th>Time</th>
+                                    <th>Activity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>8:00 AM - 9:00 AM</td>
+                                    <td>Wake up, breakfast</td>
+                                </tr>
+                                <tr>
+                                    <td>9:00 AM - 1:00 PM</td>
+                                    <td>Study (4 hours)</td>
+                                </tr>
+                                <tr>
+                                    <td>1:00 PM - 2:00 PM</td>
+                                    <td>Lunch break</td>
+                                </tr>
+                                <tr>
+                                    <td>2:00 PM - 6:00 PM</td>
+                                    <td>Study (4 hours)</td>
+                                </tr>
+                                <tr>
+                                    <td>6:00 PM - 8:00 PM</td>
+                                    <td>Gym/leisure</td>
+                                </tr>
+                                <tr>
+                                    <td>8:00 PM - 10:00 PM</td>
+                                    <td>Study/revision (optional 2 hours)</td>
+                                </tr>
+                                <tr>
+                                    <td>10:00 PM - 11:00 PM</td>
+                                    <td>Relax, sleep</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h4 class="font-bold text-lg mb-4">Study Hours Summary</h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h5 class="font-bold text-center">Weekly Hours</h5>
+                        <ul class="mt-2 list-disc ml-6">
+                            <li>Weekdays: 5 days × 2 hours = 10 hours</li>
+                            <li>Weekends: 2 days × 8 hours = 16 hours</li>
+                            <li>Total per week: 26 hours</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h5 class="font-bold text-center">Monthly Hours</h5>
+                        <ul class="mt-2 list-disc ml-6">
+                            <li>Average weeks/month: 4.3</li>
+                            <li>Total per month: ~112 hours</li>
+                        </ul>
+                    </div>
+                    
+                    <div class="bg-gray-50 p-4 rounded-lg">
+                        <h5 class="font-bold text-center">Total Preparation</h5>
+                        <ul class="mt-2 list-disc ml-6">
+                            <li>April - December: ~936 hours</li>
+                            <li>January: ~112 hours</li>
+                            <li>Total: ~1048 hours</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h4 class="font-bold text-lg mb-4">Subject-wise Roadmap</h4>
+                
+                <table class="timetable">
+                    <thead>
+                        <tr>
+                            <th>Subject</th>
+                            <th>Hours Allocation</th>
+                            <th>Percentage</th>
+                            <th>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Probability and Statistics</td>
+                            <td>100 hours</td>
+                            <td>10.6%</td>
+                            <td>Foundation subject, high weightage</td>
+                        </tr>
+                        <tr>
+                            <td>Linear Algebra</td>
+                            <td>100 hours</td>
+                            <td>10.6%</td>
+                            <td>Essential for ML/AI understanding</td>
+                        </tr>
+                        <tr>
+                            <td>Calculus and Optimization</td>
+                            <td>100 hours</td>
+                            <td>10.6%</td>
+                            <td>Critical for gradient-based algorithms</td>
+                        </tr>
+                        <tr>
+                            <td>Programming, DS & Algorithms</td>
+                            <td>50 hours</td>
+                            <td>5.3%</td>
+                            <td>Reduced due to existing Python knowledge</td>
+                        </tr>
+                        <tr>
+                            <td>Database Management</td>
+                            <td>50 hours</td>
+                            <td>5.3%</td>
+                            <td>Reduced due to existing SQL knowledge</td>
+                        </tr>
+                        <tr>
+                            <td>Machine Learning</td>
+                            <td>175 hours</td>
+                            <td>18.6%</td>
+                            <td>Emphasized due to high weightage</td>
+                        </tr>
+                        <tr>
+                            <td>Artificial Intelligence</td>
+                            <td>175 hours</td>
+                            <td>18.6%</td>
+                            <td>Core focus area</td>
+                        </tr>
+                        <tr>
+                            <td>General Aptitude</td>
+                            <td>140 hours</td>
+                            <td>14.9%</td>
+                            <td>15% of GATE paper</td>
+                        </tr>
+                        <tr>
+                            <td>Buffer/Flexibility</td>
+                            <td>58 hours</td>
+                            <td>5.5%</td>
+                            <td>For unexpected events/difficult topics</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Total</strong></td>
+                            <td><strong>948 hours</strong></td>
+                            <td><strong>100%</strong></td>
+                            <td>April 2025 - January 2026</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div class="card">
+                <h4 class="font-bold text-lg mb-4">Study Phases</h4>
+                
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <span>Phase 1: Foundations (April - June 2025)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="mb-4">Build a strong foundation in the mathematical subjects that underpin Data Science and AI.</p>
+                        
+                        <table class="timetable">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Hours</th>
+                                    <th>Monthly Breakdown</th>
+                                    <th>Key Topics</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Probability and Statistics</td>
+                                    <td>100 hours</td>
+                                    <td>~33 hours/month</td>
+                                    <td>Probability axioms, Random variables, Distributions, Statistical testing</td>
+                                </tr>
+                                <tr>
+                                    <td>Linear Algebra</td>
+                                    <td>100 hours</td>
+                                    <td>~33 hours/month</td>
+                                    <td>Vectors, Matrices, Eigenvalues, SVD, Linear transformations</td>
+                                </tr>
+                                <tr>
+                                    <td>Calculus and Optimization</td>
+                                    <td>100 hours</td>
+                                    <td>~33 hours/month</td>
+                                    <td>Limits, Derivatives, Integrals, Optimization techniques</td>
+                                </tr>
+                                <tr>
+                                    <td>General Aptitude</td>
+                                    <td>36 hours</td>
+                                    <td>~12 hours/month</td>
+                                    <td>Verbal ability, Numerical ability, Reasoning</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="mt-4">
+                            <h5 class="font-bold">Phase 1 Strategy:</h5>
+                            <ul class="list-disc ml-6 mt-2">
+                                <li>Focus on building strong conceptual understanding</li>
+                                <li>Use visualization tools to grasp complex mathematical concepts</li>
+                                <li>Practice basic problem-solving daily</li>
+                                <li>Create concise notes with formulas and key concepts</li>
+                                <li>Weekly self-assessment through practice problems</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Phase 2: Programming & Databases (July - August 2025)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="mb-4">Leverage your existing Python and SQL knowledge while filling any gaps in these domains.</p>
+                        
+                        <table class="timetable">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Hours</th>
+                                    <th>Monthly Breakdown</th>
+                                    <th>Key Topics</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Programming, DS & Algorithms</td>
+                                    <td>50 hours</td>
+                                    <td>~25 hours/month</td>
+                                    <td>Python specifics, Data structures, Search/Sort algorithms, Graph algorithms</td>
+                                </tr>
+                                <tr>
+                                    <td>Database Management</td>
+                                    <td>50 hours</td>
+                                    <td>~25 hours/month</td>
+                                    <td>ER modeling, Relational algebra, SQL, Data warehousing, Normalization</td>
+                                </tr>
+                                <tr>
+                                    <td>General Aptitude</td>
+                                    <td>24 hours</td>
+                                    <td>~12 hours/month</td>
+                                    <td>Continue with regular practice</td>
+                                </tr>
+                                <tr>
+                                    <td>Buffer/Revision of Phase 1</td>
+                                    <td>~50 hours</td>
+                                    <td>~25 hours/month</td>
+                                    <td>Revisit difficult math concepts, Practice more problems</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="mt-4">
+                            <h5 class="font-bold">Phase 2 Strategy:</h5>
+                            <ul class="list-disc ml-6 mt-2">
+                                <li>Use your existing Python knowledge to focus on GATE-specific programming questions</li>
+                                <li>Implement key data structures and algorithms in Python</li>
+                                <li>Practice database design and optimization problems</li>
+                                <li>Create sample SQL queries for common database operations</li>
+                                <li>Begin integrating Phase 1 knowledge with programming applications</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Phase 3: Advanced Topics (September - December 2025)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="mb-4">Focus on the core Data Science and AI topics that constitute the majority of the exam.</p>
+                        
+                        <table class="timetable">
+                            <thead>
+                                <tr>
+                                    <th>Subject</th>
+                                    <th>Hours</th>
+                                    <th>Monthly Breakdown</th>
+                                    <th>Key Topics</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Machine Learning</td>
+                                    <td>175 hours</td>
+                                    <td>~44 hours/month</td>
+                                    <td>
+                                        <p>September: Regression models, Classification basics</p>
+                                        <p>October: SVM, Decision trees, Ensemble methods</p>
+                                        <p>November: Neural networks, Deep learning</p>
+                                        <p>December: Unsupervised learning, Dimensionality reduction</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Artificial Intelligence</td>
+                                    <td>175 hours</td>
+                                    <td>~44 hours/month</td>
+                                    <td>
+                                        <p>September: Search algorithms (informed, uninformed)</p>
+                                        <p>October: Logic, propositional & predicate</p>
+                                        <p>November: Reasoning under uncertainty</p>
+                                        <p>December: Advanced AI topics</p>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>General Aptitude</td>
+                                    <td>48 hours</td>
+                                    <td>~12 hours/month</td>
+                                    <td>Continue regular practice with previous GATE questions</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="mt-4">
+                            <h5 class="font-bold">Phase 3 Strategy:</h5>
+                            <ul class="list-disc ml-6 mt-2">
+                                <li>Connect mathematical foundations to ML/AI applications</li>
+                                <li>Implement key algorithms to reinforce understanding</li>
+                                <li>Practice derivations of important formulas</li>
+                                <li>Focus on understanding model behavior, advantages, and limitations</li>
+                                <li>Begin solving previous years' GATE questions on these topics</li>
+                                <li>Create flowcharts for complex algorithms</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Phase 4: Revision & Mock Tests (January 2026)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <p class="mb-4">Consolidate your knowledge and build exam temperament through intensive practice.</p>
+                        
+                        <table class="timetable">
+                            <thead>
+                                <tr>
+                                    <th>Activity</th>
+                                    <th>Hours</th>
+                                    <th>Focus</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Comprehensive Revision</td>
+                                    <td>40 hours</td>
+                                    <td>Review of all subjects using concise notes and formula sheets</td>
+                                </tr>
+                                <tr>
+                                    <td>Previous Year Questions</td>
+                                    <td>30 hours</td>
+                                    <td>Systematic solving of previous GATE questions (CS/IT papers for similar topics)</td>
+                                </tr>
+                                <tr>
+                                    <td>Mock Tests</td>
+                                    <td>30 hours</td>
+                                    <td>Full-length mock tests under timed conditions</td>
+                                </tr>
+                                <tr>
+                                    <td>Weak Areas Focus</td>
+                                    <td>12 hours</td>
+                                    <td>Targeted practice for identified weak areas</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                        
+                        <div class="mt-4">
+                            <h5 class="font-bold">Phase 4 Strategy:</h5>
+                            <ul class="list-disc ml-6 mt-2">
+                                <li>Take at least 8-10 full-length mock tests</li>
+                                <li>Analyze each mock test to identify weak areas</li>
+                                <li>Focus on timing and accuracy</li>
+                                <li>Revise formulas and key concepts daily</li>
+                                <li>Practice question selection strategy (which questions to attempt first)</li>
+                                <li>Focus on maintaining peak mental and physical health</li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h4 class="font-bold text-lg mb-4">Study Tips & Strategies</h4>
+                
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <span>General Tips</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>Use commute time for listening to educational podcasts or audiobooks</li>
+                            <li>Take short 5-minute breaks every 25 minutes of study (Pomodoro technique)</li>
+                            <li>Create concise notes and review them regularly</li>
+                            <li>Join online forums or study groups for collaborative learning</li>
+                            <li>Use visualization techniques for complex mathematical concepts</li>
+                            <li>Solve at least 5 practice problems daily</li>
+                            <li>Regularly review your progress and adjust your plan if needed</li>
+                            <li>Maintain a healthy sleep schedule and diet</li>
+                            <li>Use spaced repetition for better retention of concepts</li>
+                            <li>Set specific, achievable goals for each study session</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Subject-Specific Strategies</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>For ML/AI: Implement algorithms in Python to reinforce understanding</li>
+                            <li>For Mathematics: Practice derivations and create formula sheets</li>
+                            <li>For Algorithms: Visualize execution using flowcharts or animation tools</li>
+                            <li>For Databases: Practice SQL queries on actual database systems</li>
+                            <li>For Aptitude: Daily practice of at least 5 problems across different topics</li>
+                            <li>For Statistics: Use real-world examples to understand concepts</li>
+                            <li>For Linear Algebra: Utilize visualizations for eigenvalues and transformations</li>
+                            <li>For Calculus: Focus on interpreting derivatives and integrals geometrically</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Leveraging Your Strengths</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>Use your Python experience to quickly master programming topics</li>
+                            <li>Apply SQL knowledge to solve complex database problems efficiently</li>
+                            <li>Connect AI/ML theory to practical implementations you're familiar with</li>
+                            <li>Share your knowledge by teaching concepts to others (reinforces learning)</li>
+                            <li>Use your existing coding skills to implement algorithms from scratch</li>
+                            <li>Create practical projects that apply theoretical concepts</li>
+                            <li>Utilize your technical background to understand mathematical foundations quickly</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Avoiding Common Pitfalls</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>Don't skip fundamentals even if topics seem familiar</li>
+                            <li>Avoid marathon study sessions; consistency is more effective</li>
+                            <li>Don't neglect General Aptitude (15% of total marks)</li>
+                            <li>Beware of information overload; focus on understanding core concepts</li>
+                            <li>Don't ignore health and sleep; they directly impact learning efficiency</li>
+                            <li>Avoid last-minute cramming before the exam</li>
+                            <li>Don't waste time on very obscure topics with low probability of appearing</li>
+                            <li>Refrain from comparing your progress with others constantly</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Weekly Routine Recommendation</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>Start each week by setting specific, measurable goals for that week</li>
+                            <li>Reserve Sunday evenings for weekly review and planning the next week</li>
+                            <li>Dedicate at least one weekday to reviewing previously studied material</li>
+                            <li>Practice at least 20 GATE-style questions every weekend</li>
+                            <li>Take one practice test or solve one previous year paper every two weeks</li>
+                            <li>Allocate time for regular fitness and relaxation</li>
+                            <li>Connect with study partners or mentors once a week for doubt clearing</li>
+                            <li>Rotate subjects throughout the week to maintain interest and prevent burnout</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Resources Section -->
+        <section class="section" id="resources">
+            <h3 class="section-title">Free Study Resources</h3>
+            
+            <div class="card">
+                <p class="mb-4">Below is a curated collection of free, high-quality resources accessible in India to help you prepare for each subject in the GATE DA 2026 syllabus.</p>
+                
+                <div class="resource-grid">
+                    <div class="resource-card">
+                        <h4>Probability and Statistics</h4>
+                        <ul class="list-disc ml-6 mt-2">
+                            <li><a href="https://nptel.ac.in/courses/111105041" target="_blank">NPTEL: "Probability and Statistics" by Prof. Somesh Kumar</a></li>
+                            <li><a href="https://www.khanacademy.org/math/statistics-probability" target="_blank">Khan Academy: Probability & Statistics</a></li>
+                            <li><a href="https://www.youtube.com/c/joshstarmer" target="_blank">YouTube: StatQuest by Josh Starmer</a></li>
+                            <li><a href="https://projects.iq.harvard.edu/stat110/home" target="_blank">Harvard: Statistics 110</a></li>
+                            <li><a href="https://see.stanford.edu/Course/Stats116" target="_blank">Stanford: Theory of Probability</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <h4>Linear Algebra</h4>
+                        <ul class="list-disc ml-6 mt-2">
+                            <li><a href="https://ocw.mit.edu/courses/18-06-linear-algebra-spring-2010/" target="_blank">MIT OCW: Gilbert Strang's Linear Algebra</a></li>
+                            <li><a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDPD3MizzM2xVFitgF8hE_ab" target="_blank">YouTube: 3Blue1Brown "Essence of Linear Algebra"</a></li>
+                            <li><a href="https://joshua.smcvt.edu/linearalgebra/" target="_blank">E-book: "Linear Algebra" by Jim Hefferon (free PDF)</a></li>
+                            <li><a href="https://nptel.ac.in/courses/111108066" target="_blank">NPTEL: Linear Algebra</a></li>
+                            <li><a href="https://math.berkeley.edu/~hutching/teach/54-2017/index.html" target="_blank">Berkeley: Linear Algebra and Differential Equations</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <h4>Calculus and Optimization</h4>
+                        <ul class="list-disc ml-6 mt-2">
+                            <li><a href="https://nptel.ac.in/courses/111106131" target="_blank">NPTEL: "Engineering Mathematics" by Prof. P.N. Agrawal</a></li>
+                            <li><a href="https://www.khanacademy.org/math/calculus-1" target="_blank">Khan Academy: Calculus</a></li>
+                            <li><a href="https://www.youtube.com/user/patrickJMT" target="_blank">YouTube: PatrickJMT Calculus videos</a></li>
+                            <li><a href="https://www.youtube.com/playlist?list=PLZHQObOWTQDMsr9K-rj53DwVRMYO3t5Yr" target="_blank">YouTube: 3Blue1Brown Calculus Series</a></li>
+                            <li><a href="https://ocw.mit.edu/courses/18-01sc-single-variable-calculus-fall-2010/" target="_blank">MIT OCW: Single Variable Calculus</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <h4>Programming, Data Structures, and Algorithms</h4>
+                        <ul class="list-disc ml-6 mt-2">
+                            <li><a href="https://www.geeksforgeeks.org/data-structures/" target="_blank">GeeksforGeeks: DSA Tutorials</a></li>
+                            <li><a href="https://www.youtube.com/watch?v=0IAPZzGSbME&list=PLDN4rrl48XKpZkf03iYFl-O29szjTrs_O" target="_blank">YouTube: Abdul Bari Algorithms</a></li>
+                            <li><a href="https://leetcode.com/" target="_blank">LeetCode: Free practice problems</a></li>
+                            <li><a href="https://www.programiz.com/python-programming" target="_blank">Programiz: Python Programming</a></li>
+                            <li><a href="https://nptel.ac.in/courses/106106145" target="_blank">NPTEL: Programming, Data Structures and Algorithms</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <h4>Database Management and Warehousing</h4>
+                        <ul class="list-disc ml-6 mt-2">
+                            <li><a href="https://nptel.ac.in/courses/106104135" target="_blank">NPTEL: "Database Management System" by Prof. P.P. Chakrabarti</a></li>
+                            <li><a href="https://www.coursera.org/learn/database-management" target="_blank">Coursera: "Introduction to Databases" by Stanford (audit free)</a></li>
+                            <li><a href="https://www.youtube.com/watch?v=HXV3zeQKqGY" target="_blank">YouTube: freeCodeCamp SQL Tutorials</a></li>
+                            <li><a href="https://mode.com/sql-tutorial/" target="_blank">Mode Analytics: SQL Tutorial</a></li>
+                            <li><a href="https://www.geeksforgeeks.org/dbms/" target="_blank">GeeksforGeeks: DBMS Tutorial</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <h4>Machine Learning</h4>
+                        <ul class="list-disc ml-6 mt-2">
+                            <li><a href="https://www.coursera.org/learn/machine-learning" target="_blank">Coursera: Andrew Ng's Machine Learning (audit free)</a></li>
+                            <li><a href="https://www.fast.ai/" target="_blank">Fast.ai: Practical Deep Learning (free)</a></li>
+                            <li><a href="https://www.youtube.com/c/sentdex" target="_blank">YouTube: Sentdex ML Tutorials</a></li>
+                            <li><a href="https://nptel.ac.in/courses/106106139" target="_blank">NPTEL: Introduction to Machine Learning</a></li>
+                            <li><a href="https://github.com/microsoft/ML-For-Beginners" target="_blank">Microsoft: ML for Beginners</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <h4>Artificial Intelligence</h4>
+                        <ul class="list-disc ml-6 mt-2">
+                            <li><a href="https://nptel.ac.in/courses/106105077" target="_blank">NPTEL: "Artificial Intelligence" by Prof. Deepak Khemani</a></li>
+                            <li><a href="https://www.youtube.com/watch?v=JMUxmLyrhSk" target="_blank">YouTube: AI lectures by Edureka</a></li>
+                            <li><a href="https://artint.info/2e/html/ArtInt2e.html" target="_blank">E-book: "Artificial Intelligence: Foundations of Computational Agents"</a></li>
+                            <li><a href="https://github.com/aimacode/aima-python" target="_blank">GitHub: Code for "Artificial Intelligence: A Modern Approach"</a></li>
+                            <li><a href="https://ocw.mit.edu/courses/6-034-artificial-intelligence-fall-2010/" target="_blank">MIT OCW: Artificial Intelligence</a></li>
+                        </ul>
+                    </div>
+                    
+                    <div class="resource-card">
+                        <h4>General Aptitude</h4>
+                        <ul class="list-disc ml-6 mt-2">
+                            <li><a href="https://www.indiabix.com/" target="_blank">IndiaBIX: Aptitude Questions</a></li>
+                            <li><a href="https://www.youtube.com/c/CareerRideVideos" target="_blank">YouTube: CareerRide GATE Aptitude</a></li>
+                            <li><a href="https://gateoverflow.in/exam/gate" target="_blank">GATE Overflow: Previous GATE papers</a></li>
+                            <li><a href="https://www.examrace.com/GATE/GATE-Previous-Years-Papers/" target="_blank">Examrace: GATE Previous Year Papers</a></li>
+                            <li><a href="https://www.javatpoint.com/aptitude/quantitative" target="_blank">JavaTpoint: Quantitative Aptitude</a></li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="font-bold text-lg">Mock Tests & Practice Papers</h4>
+                    <ul class="list-disc ml-6 mt-2">
+                        <li><a href="https://gateoverflow.in/exam/gate" target="_blank">GATE Overflow: Comprehensive question bank and discussions</a></li>
+                        <li><a href="https://www.youtube.com/c/GATEACADEMYPVTLTD" target="_blank">YouTube: GATE Academy free mock tests and solutions</a></li>
+                        <li><a href="https://www.youtube.com/c/MadeEasyGroup" target="_blank">YouTube: MADE EASY free mock tests</a></li>
+                        <li><a href="https://testbook.com/gate-mock-test" target="_blank">Testbook: Free GATE mock tests (limited access)</a></li>
+                        <li><a href="https://www.geeksforgeeks.org/gate-cs-notes-gq/" target="_blank">GeeksforGeeks: GATE CS/IT practice questions (useful for overlapping topics)</a></li>
+                    </ul>
+                    
+                    <div class="mt-4">
+                        <h5 class="font-bold">Practice Strategies:</h5>
+                        <ul class="list-disc ml-6 mt-2">
+                            <li>Use CSE/IT papers for practicing overlapping topics like ML, programming, and databases</li>
+                            <li>Take timed tests to build exam temperament and time management skills</li>
+                            <li>Analyze mistakes thoroughly after each mock test</li>
+                            <li>Create a bank of frequently-appearing questions and concepts</li>
+                            <li>Practice both MCQs and numerical answer type questions</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="font-bold text-lg">Online Forums & Communities</h4>
+                    <ul class="list-disc ml-6 mt-2">
+                        <li><a href="https://gateoverflow.in/" target="_blank">GATE Overflow: Q&A platform for GATE aspirants</a></li>
+                        <li><a href="https://www.reddit.com/r/gatecse/" target="_blank">Reddit: r/gatecse (useful for overlapping topics)</a></li>
+                        <li><a href="https://www.quora.com/topic/GATE-Graduate-Aptitude-Test-in-Engineering" target="_blank">Quora: GATE topic</a></li>
+                        <li><a href="https://www.facebook.com/groups/388805891832288/" target="_blank">Facebook Groups: GATE aspirants community</a></li>
+                        <li><a href="https://www.kaggle.com/discussions" target="_blank">Kaggle: Discussion forums for Data Science topics</a></li>
+                    </ul>
+                    
+                    <div class="mt-4">
+                        <h5 class="font-bold">Study Group Formation Tips:</h5>
+                        <ul class="list-disc ml-6 mt-2">
+                            <li>Form a small study group (3-5 people) with similar goals and schedules</li>
+                            <li>Meet virtually once a week to discuss difficult topics</li>
+                            <li>Assign different subjects to members to create and share summaries</li>
+                            <li>Practice explaining concepts to each other (teaching reinforces learning)</li>
+                            <li>Conduct mock interviews and problem-solving sessions</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Tracker Section -->
+        <section class="section" id="tracker">
+            <h3 class="section-title">Study Progress Tracker</h3>
+            
+            <div class="card">
+                <h4 class="font-bold text-lg mb-4">Overall Progress</h4>
+                
+                <div class="progress-container">
+                    <div class="progress-bar" id="overall-progress" style="width: 0%;"></div>
+                </div>
+                <p class="text-center"><span id="completed-topics">0</span> topics completed <span id="progress-percentage">0%</span></p>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+                    <div>
+                        <h5 class="font-bold mb-2">Weekly Goals</h5>
+                        <div id="weekly-goals">
+                            <div class="flex items-center mb-2">
+                                <input type="text" id="new-goal" placeholder="Add a new goal..." class="flex-grow p-2 border rounded mr-2">
+                                <button id="add-goal-btn" class="bg-primary text-white p-2 rounded">Add</button>
+                            </div>
+                            <ul id="goals-list" class="list-disc ml-6 mt-2">
+                                <!-- Goals will be added here dynamically -->
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h5 class="font-bold mb-2">Hours Logged</h5>
+                        <div id="hours-logged">
+                            <div class="flex items-center mb-2">
+                                <input type="number" id="log-hours" placeholder="Hours" class="w-20 p-2 border rounded mr-2" min="0" max="24">
+                                <select id="log-subject" class="p-2 border rounded mr-2">
+                                    <option value="Probability and Statistics">Probability and Statistics</option>
+                                    <option value="Linear Algebra">Linear Algebra</option>
+                                    <option value="Calculus and Optimization">Calculus and Optimization</option>
+                                    <option value="Programming, DS & Algorithms">Programming, DS & Algorithms</option>
+                                    <option value="Database Management">Database Management</option>
+                                    <option value="Machine Learning">Machine Learning</option>
+                                    <option value="Artificial Intelligence">Artificial Intelligence</option>
+                                    <option value="General Aptitude">General Aptitude</option>
+                                </select>
+                                <button id="log-hours-btn" class="bg-primary text-white p-2 rounded">Log</button>
+                            </div>
+                            <p>Total Hours Logged: <span id="total-hours">0</span></p>
+                            <p>Target: 936 hours</p>
+                            <div class="progress-container mt-2">
+                                <div class="progress-bar" id="hours-progress" style="width: 0%;"></div>
+                            </div>
+                            <div id="subject-hours" class="mt-4">
+                                <!-- Subject-wise hours will be displayed here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <h4 class="font-bold text-lg mb-4">Topic Tracker</h4>
+                
+                <div class="tracker-tools">
+                    <select id="tracker-subject" class="p-2 border rounded">
+                        <option value="probability">Probability and Statistics</option>
+                        <option value="linear-algebra">Linear Algebra</option>
+                        <option value="calculus">Calculus and Optimization</option>
+                        <option value="programming">Programming, DS & Algorithms</option>
+                        <option value="database">Database Management</option>
+                        <option value="machine-learning">Machine Learning</option>
+                        <option value="ai">Artificial Intelligence</option>
+                        <option value="aptitude">General Aptitude</option>
+                    </select>
+                    <button id="add-topic-btn" class="bg-primary text-white p-2 rounded">Add Topic</button>
+                    <button id="reset-tracker-btn" class="bg-red-500 text-white p-2 rounded">Reset Tracker</button>
+                </div>
+                
+                <div id="tracker-container">
+                    <!-- Topics will be displayed here for each subject -->
+                </div>
+            </div>
+        </section>
+        
+        <!-- Notes Section -->
+        <section class="section" id="notes">
+            <h3 class="section-title">Study Notes</h3>
+            
+            <div class="card">
+                <div class="notes-container">
+                    <h4 class="font-bold text-lg">Your Notes</h4>
+                    
+                    <div class="notes-selector">
+                        <select id="notes-subject" class="p-2 border rounded">
+                            <option value="general">General</option>
+                            <option value="probability">Probability and Statistics</option>
+                            <option value="linear-algebra">Linear Algebra</option>
+                            <option value="calculus">Calculus and Optimization</option>
+                            <option value="programming">Programming, DS & Algorithms</option>
+                            <option value="database">Database Management</option>
+                            <option value="machine-learning">Machine Learning</option>
+                            <option value="ai">Artificial Intelligence</option>
+                            <option value="aptitude">General Aptitude</option>
+                        </select>
+                        <button id="save-notes-btn" class="bg-primary text-white p-2 rounded">Save Notes</button>
+                        <button id="clear-notes-btn" class="bg-red-500 text-white p-2 rounded">Clear</button>
+                    </div>
+                    
+                    <div class="notes-editor">
+                        <textarea id="notes-content" class="notes-textarea" placeholder="Start taking notes here..."></textarea>
+                    </div>
+                </div>
+                
+                <div class="mt-6">
+                    <h4 class="font-bold text-lg">Note-Taking Tips</h4>
+                    <ul class="list-disc ml-6 mt-2">
+                        <li>Use the Cornell note-taking system: divide your notes into main points, details, and summary</li>
+                        <li>Create concise formula sheets for each mathematical subject</li>
+                        <li>Include examples to illustrate complex concepts</li>
+                        <li>Review and rewrite your notes periodically to reinforce learning</li>
+                        <li>Use diagrams, flowcharts, and mind maps for visual learning</li>
+                        <li>Highlight key definitions, formulas, and facts for quick revision</li>
+                        <li>Add page references to textbooks or online resources for deeper exploration</li>
+                        <li>Maintain a glossary of important terms and concepts</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <!-- Calendar Section -->
+        <section class="section" id="calendar">
+            <h3 class="section-title">Study Calendar</h3>
+            
+            <div class="card">
+                <h4 class="font-bold text-lg mb-4">Phase Overview</h4>
+                
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                    <div class="bg-blue-50 p-4 rounded-lg border-l-4 border-blue-500">
+                        <h5 class="font-bold">Phase 1</h5>
+                        <p>Apr - Jun 2025</p>
+                        <p class="font-semibold mt-2">Foundations</p>
+                    </div>
+                    
+                    <div class="bg-green-50 p-4 rounded-lg border-l-4 border-green-500">
+                        <h5 class="font-bold">Phase 2</h5>
+                        <p>Jul - Aug 2025</p>
+                        <p class="font-semibold mt-2">Programming & Databases</p>
+                    </div>
+                    
+                    <div class="bg-yellow-50 p-4 rounded-lg border-l-4 border-yellow-500">
+                        <h5 class="font-bold">Phase 3</h5>
+                        <p>Sep - Dec 2025</p>
+                        <p class="font-semibold mt-2">Advanced Topics</p>
+                    </div>
+                    
+                    <div class="bg-red-50 p-4 rounded-lg border-l-4 border-red-500">
+                        <h5 class="font-bold">Phase 4</h5>
+                        <p>Jan 2026</p>
+                        <p class="font-semibold mt-2">Revision & Mock Tests</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card">
+                <div class="calendar-header">
+                    <button id="prev-month" class="p-2 bg-gray-200 rounded"><i class="fas fa-chevron-left"></i></button>
+                    <h4 id="calendar-month" class="font-bold text-lg">April 2025</h4>
+                    <button id="next-month" class="p-2 bg-gray-200 rounded"><i class="fas fa-chevron-right"></i></button>
+                </div>
+                
+                <div class="weekdays">
+                    <div class="weekday">Sun</div>
+                    <div class="weekday">Mon</div>
+                    <div class="weekday">Tue</div>
+                    <div class="weekday">Wed</div>
+                    <div class="weekday">Thu</div>
+                    <div class="weekday">Fri</div>
+                    <div class="weekday">Sat</div>
+                </div>
+                
+                <div id="calendar-grid" class="calendar-grid">
+                    <!-- Calendar days will be generated here -->
+                </div>
+            </div>
+            
+            <div class="card">
+                <h4 class="font-bold text-lg mb-4">Weekly Study Suggestions</h4>
+                
+                <div class="accordion">
+                    <div class="accordion-header">
+                        <span>Weeks 1-4 (April)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>Introduction to Probability: Basic concepts, axioms, and properties</li>
+                            <li>Counting techniques: Permutations and combinations</li>
+                            <li>Vector spaces and subspaces basics</li>
+                            <li>Limits and continuity in calculus</li>
+                            <li>General Aptitude: Verbal ability practice</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Weeks 5-8 (May)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>Random variables and probability distributions</li>
+                            <li>Matrices, determinants, and eigenvalues</li>
+                            <li>Derivatives and applications</li>
+                            <li>Single variable optimization</li>
+                            <li>General Aptitude: Numerical ability practice</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Weeks 9-12 (June)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>Statistical hypothesis testing and confidence intervals</li>
+                            <li>Linear transformations and SVD</li>
+                            <li>Advanced optimization techniques</li>
+                            <li>General Aptitude: Analytical and logical reasoning</li>
+                            <li>Review of Phase 1 topics and practice problems</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Weeks 13-16 (July)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>Python programming: Data types, functions, and advanced features</li>
+                            <li>Basic data structures: Stacks, queues, linked lists</li>
+                            <li>Search algorithms: Linear and binary search</li>
+                            <li>Review of challenging topics from Phase 1</li>
+                            <li>General Aptitude: Regular practice</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Weeks 17-20 (August)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>Basic sorting algorithms and divide-and-conquer techniques</li>
+                            <li>ER modeling and relational model</li>
+                            <li>SQL queries and database design</li>
+                            <li>Data warehousing concepts</li>
+                            <li>Prepare for transition to ML and AI topics</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Weeks 21-24 (September)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>Supervised Learning: Regression models</li>
+                            <li>Classification basics: Logistic regression, k-NN</li>
+                            <li>Search algorithms in AI: Uninformed search</li>
+                            <li>Continue regular General Aptitude practice</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Weeks 25-28 (October)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>Support Vector Machines and Decision Trees</li>
+                            <li>Ensemble methods: Random forests, boosting</li>
+                            <li>Logic: Propositional and predicate logic</li>
+                            <li>Practice implementing ML algorithms</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Weeks 29-32 (November)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>Neural networks fundamentals</li>
+                            <li>Deep learning basics</li>
+                            <li>Reasoning under uncertainty</li>
+                            <li>Start solving previous GATE questions</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Weeks 33-36 (December)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>Unsupervised learning: Clustering algorithms</li>
+                            <li>Dimensionality reduction techniques</li>
+                            <li>Advanced AI topics and applications</li>
+                            <li>Begin systematic revision of all subjects</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Weeks 37-38 (January - First Half)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>Comprehensive revision of all subjects</li>
+                            <li>Practice with formula sheets and quick-recall techniques</li>
+                            <li>First round of full-length mock tests</li>
+                            <li>Identify and focus on weak areas</li>
+                        </ul>
+                    </div>
+                </div>
+                
+                <div class="accordion mt-4">
+                    <div class="accordion-header">
+                        <span>Weeks 39-40 (January - Second Half)</span>
+                        <i class="fas fa-chevron-down"></i>
+                    </div>
+                    <div class="accordion-content">
+                        <ul class="list-disc ml-6">
+                            <li>Intensive practice of previous year questions</li>
+                            <li>Multiple mock tests under timed conditions</li>
+                            <li>Final revision of high-weightage topics</li>
+                            <li>Preparation strategy for exam day</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </div>
+    
+    <!-- Task Modal -->
+    <div class="task-modal" id="task-modal">
+        <div class="task-modal-content">
+            <h4 class="font-bold text-lg mb-4">Add Task</h4>
+            
+            <div class="mb-4">
+                <label for="task-date" class="block mb-1">Date:</label>
+                <input type="text" id="task-date" class="w-full p-2 border rounded" readonly>
+            </div>
+            
+            <div class="mb-4">
+                <label for="task-title" class="block mb-1">Task Title:</label>
+                <input type="text" id="task-title" class="w-full p-2 border rounded" placeholder="Enter task title...">
+            </div>
+            
+            <div class="mb-4">
+                <label for="task-details" class="block mb-1">Details (optional):</label>
+                <textarea id="task-details" class="w-full p-2 border rounded" rows="3" placeholder="Enter task details..."></textarea>
+            </div>
+            
+            <div class="flex justify-end gap-2">
+                <button id="cancel-task-btn" class="bg-gray-300 p-2 rounded">Cancel</button>
+                <button id="save-task-btn" class="bg-primary text-white p-2 rounded">Save Task</button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Back to Top Button -->
+    <div class="back-to-top" id="backToTop">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // DOM elements
+            const sidebar = document.getElementById('sidebar');
+            const content = document.getElementById('content');
+            const toggleSidebar = document.getElementById('toggleSidebar');
+            const mobileToggle = document.getElementById('mobileToggle');
+            const menuItems = document.querySelectorAll('.menu-item');
+            const sections = document.querySelectorAll('.section');
+            const backToTop = document.getElementById('backToTop');
+            const accordionHeaders = document.querySelectorAll('.accordion-header');
+            
+            // Task modal elements
+            const taskModal = document.getElementById('task-modal');
+            const taskDate = document.getElementById('task-date');
+            const taskTitle = document.getElementById('task-title');
+            const taskDetails = document.getElementById('task-details');
+            const saveTaskBtn = document.getElementById('save-task-btn');
+            const cancelTaskBtn = document.getElementById('cancel-task-btn');
+            
+            // Tracker elements
+            const overallProgress = document.getElementById('overall-progress');
+            const completedTopics = document.getElementById('completed-topics');
+            const progressPercentage = document.getElementById('progress-percentage');
+            const addTopicBtn = document.getElementById('add-topic-btn');
+            const resetTrackerBtn = document.getElementById('reset-tracker-btn');
+            const trackerSubject = document.getElementById('tracker-subject');
+            const trackerContainer = document.getElementById('tracker-container');
+            
+            // Notes elements
+            const notesSubject = document.getElementById('notes-subject');
+            const notesContent = document.getElementById('notes-content');
+            const saveNotesBtn = document.getElementById('save-notes-btn');
+            const clearNotesBtn = document.getElementById('clear-notes-btn');
+            
+            // Calendar elements
+            const calendarMonth = document.getElementById('calendar-month');
+            const prevMonth = document.getElementById('prev-month');
+            const nextMonth = document.getElementById('next-month');
+            const calendarGrid = document.getElementById('calendar-grid');
+            
+            // Hours logging elements
+            const logHours = document.getElementById('log-hours');
+            const logSubject = document.getElementById('log-subject');
+            const logHoursBtn = document.getElementById('log-hours-btn');
+            const totalHours = document.getElementById('total-hours');
+            const hoursProgress = document.getElementById('hours-progress');
+            const subjectHours = document.getElementById('subject-hours');
+            
+            // Weekly goals elements
+            const newGoal = document.getElementById('new-goal');
+            const addGoalBtn = document.getElementById('add-goal-btn');
+            const goalsList = document.getElementById('goals-list');
+            
+            // State variables
+            let currentTaskDate = null;
+            let currentMonth = 3; // April (0-indexed)
+            let currentYear = 2025;
+            
+            // Sample topics for each subject
+            const sampleTopics = {
+                'probability': [
+                    'Probability Axioms',
+                    'Conditional Probability',
+                    'Bayes Theorem',
+                    'Random Variables',
+                    'Probability Distributions',
+                    'Expectation and Variance',
+                    'Binomial Distribution',
+                    'Normal Distribution',
+                    'Hypothesis Testing',
+                    'Confidence Intervals'
+                ],
+                'linear-algebra': [
+                    'Vector Spaces',
+                    'Linear Independence',
+                    'Basis and Dimension',
+                    'Linear Transformations',
+                    'Matrices',
+                    'Determinants',
+                    'Eigenvalues and Eigenvectors',
+                    'Orthogonality',
+                    'SVD',
+                    'LU Decomposition'
+                ],
+                'calculus': [
+                    'Limits and Continuity',
+                    'Differentiation',
+                    'Integration',
+                    'Partial Derivatives',
+                    'Multiple Integrals',
+                    'Taylor Series',
+                    'Optimization Techniques',
+                    'Lagrange Multipliers',
+                    'Gradient Descent',
+                    'Newton\'s Method'
+                ],
+                'programming': [
+                    'Python Basics',
+                    'Data Types and Structures',
+                    'Functions and Modules',
+                    'OOP in Python',
+                    'Stacks and Queues',
+                    'Linked Lists',
+                    'Trees and Graphs',
+                    'Searching Algorithms',
+                    'Sorting Algorithms',
+                    'Time and Space Complexity'
+                ],
+                'database': [
+                    'ER Modeling',
+                    'Relational Model',
+                    'SQL Basics',
+                    'Normalization',
+                    'Indexing',
+                    'Transactions',
+                    'Query Optimization',
+                    'Data Warehousing',
+                    'OLAP',
+                    'ETL Processes'
+                ],
+                'machine-learning': [
+                    'Linear Regression',
+                    'Logistic Regression',
+                    'Decision Trees',
+                    'Random Forests',
+                    'Support Vector Machines',
+                    'K-Nearest Neighbors',
+                    'Neural Networks',
+                    'Clustering Algorithms',
+                    'Dimensionality Reduction',
+                    'Model Evaluation'
+                ],
+                'ai': [
+                    'Uninformed Search Strategies',
+                    'Informed Search Strategies',
+                    'Adversarial Search',
+                    'Propositional Logic',
+                    'First-Order Logic',
+                    'Inference',
+                    'Probabilistic Reasoning',
+                    'Bayesian Networks',
+                    'Markov Decision Processes',
+                    'Reinforcement Learning'
+                ],
+                'aptitude': [
+                    'Verbal Reasoning',
+                    'Numerical Reasoning',
+                    'Logical Reasoning',
+                    'Data Interpretation',
+                    'Quantitative Comparison',
+                    'Arithmetic',
+                    'Algebra',
+                    'Geometry',
+                    'English Language',
+                    'General Knowledge'
+                ]
+            };
+            
+            // Initialize local storage
+            function initLocalStorage() {
+                if (!localStorage.getItem('gateDaTracker')) {
+                    const initialTracker = {};
+                    for (const subject in sampleTopics) {
+                        initialTracker[subject] = sampleTopics[subject].map(topic => ({
+                            name: topic,
+                            completed: false
+                        }));
+                    }
+                    localStorage.setItem('gateDaTracker', JSON.stringify(initialTracker));
+                }
+                
+                if (!localStorage.getItem('gateDaNotes')) {
+                    const initialNotes = {
+                        'general': '',
+                        'probability': '',
+                        'linear-algebra': '',
+                        'calculus': '',
+                        'programming': '',
+                        'database': '',
+                        'machine-learning': '',
+                        'ai': '',
+                        'aptitude': ''
+                    };
+                    localStorage.setItem('gateDaNotes', JSON.stringify(initialNotes));
+                }
+                
+                if (!localStorage.getItem('gateDaCalendar')) {
+                    localStorage.setItem('gateDaCalendar', JSON.stringify({}));
+                }
+                
+                if (!localStorage.getItem('gateDaHours')) {
+                    const initialHours = {
+                        total: 0,
+                        subjects: {
+                            'Probability and Statistics': 0,
+                            'Linear Algebra': 0,
+                            'Calculus and Optimization': 0,
+                            'Programming, DS & Algorithms': 0,
+                            'Database Management': 0,
+                            'Machine Learning': 0,
+                            'Artificial Intelligence': 0,
+                            'General Aptitude': 0
+                        }
+                    };
+                    localStorage.setItem('gateDaHours', JSON.stringify(initialHours));
+                }
+                
+                if (!localStorage.getItem('gateDaGoals')) {
+                    localStorage.setItem('gateDaGoals', JSON.stringify([]));
+                }
+            }
+            
+            // Sidebar toggle
+            toggleSidebar.addEventListener('click', function() {
+                sidebar.classList.toggle('collapsed');
+                content.classList.toggle('expanded');
+                
+                const icon = toggleSidebar.querySelector('i');
+                if (sidebar.classList.contains('collapsed')) {
+                    icon.classList.remove('fa-angle-left');
+                    icon.classList.add('fa-angle-right');
+                } else {
+                    icon.classList.remove('fa-angle-right');
+                    icon.classList.add('fa-angle-left');
+                }
+            });
+            
+            // Mobile sidebar toggle
+            mobileToggle.addEventListener('click', function() {
+                sidebar.classList.toggle('mobile-active');
+            });
+            
+            // Section navigation
+            menuItems.forEach(item => {
+                item.addEventListener('click', function() {
+                    const sectionId = this.getAttribute('data-section');
+                    
+                    // Update active menu item
+                    menuItems.forEach(menuItem => menuItem.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Show selected section, hide others
+                    sections.forEach(section => {
+                        section.classList.remove('active');
+                        if (section.id === sectionId) {
+                            section.classList.add('active');
+                            
+                            // Update content based on the section
+                            if (sectionId === 'tracker') {
+                                loadTrackerData();
+                                updateProgressBar();
+                            } else if (sectionId === 'notes') {
+                                loadNotes();
+                            } else if (sectionId === 'calendar') {
+                                generateCalendar();
+                            }
+                        }
+                    });
+                    
+                    // Close mobile sidebar after selection
+                    if (window.innerWidth <= 768) {
+                        sidebar.classList.remove('mobile-active');
+                    }
+                });
+            });
+            
+            // Back to top button
+            window.addEventListener('scroll', function() {
+                if (window.scrollY > 300) {
+                    backToTop.classList.add('visible');
+                } else {
+                    backToTop.classList.remove('visible');
+                }
+            });
+            
+            backToTop.addEventListener('click', function() {
+                window.scrollTo({
+                    top: 0,
+                    behavior: 'smooth'
+                });
+            });
+            
+            // Accordion functionality
+            accordionHeaders.forEach(header => {
+                header.addEventListener('click', function() {
+                    const content = this.nextElementSibling;
+                    content.classList.toggle('active');
+                    
+                    const icon = this.querySelector('i');
+                    if (content.classList.contains('active')) {
+                        icon.classList.remove('fa-chevron-down');
+                        icon.classList.add('fa-chevron-up');
+                    } else {
+                        icon.classList.remove('fa-chevron-up');
+                        icon.classList.add('fa-chevron-down');
+                    }
+                });
+            });
+            
+            // Load tracker data
+            function loadTrackerData() {
+                const data = JSON.parse(localStorage.getItem('gateDaTracker'));
+                const subject = trackerSubject.value;
+                
+                // Clear container
+                trackerContainer.innerHTML = '';
+                
+                if (data && data[subject]) {
+                    const table = document.createElement('table');
+                    table.className = 'tracker-table';
+                    
+                    // Create header
+                    const thead = document.createElement('thead');
+                    const headerRow = document.createElement('tr');
+                    const th1 = document.createElement('th');
+                    th1.textContent = 'Topic';
+                    const th2 = document.createElement('th');
+                    th2.textContent = 'Status';
+                    const th3 = document.createElement('th');
+                    th3.textContent = 'Actions';
+                    
+                    headerRow.appendChild(th1);
+                    headerRow.appendChild(th2);
+                    headerRow.appendChild(th3);
+                    thead.appendChild(headerRow);
+                    table.appendChild(thead);
+                    
+                    // Create body
+                    const tbody = document.createElement('tbody');
+                    
+                    data[subject].forEach((topic, index) => {
+                        const row = document.createElement('tr');
+                        
+                        const td1 = document.createElement('td');
+                        td1.textContent = topic.name;
+                        
+                        const td2 = document.createElement('td');
+                        const checkbox = document.createElement('input');
+                        checkbox.type = 'checkbox';
+                        checkbox.checked = topic.completed;
+                        checkbox.addEventListener('change', function() {
+                            updateTopicStatus(subject, index, this.checked);
+                        });
+                        td2.appendChild(checkbox);
+                        
+                        const td3 = document.createElement('td');
+                        const deleteBtn = document.createElement('button');
+                        deleteBtn.className = 'text-red-500 ml-2';
+                        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                        deleteBtn.addEventListener('click', function() {
+                            deleteTopic(subject, index);
+                        });
+                        td3.appendChild(deleteBtn);
+                        
+                        row.appendChild(td1);
+                        row.appendChild(td2);
+                        row.appendChild(td3);
+                        tbody.appendChild(row);
+                    });
+                    
+                    table.appendChild(tbody);
+                    trackerContainer.appendChild(table);
+                }
+            }
+            
+            // Update topic status
+            function updateTopicStatus(subject, index, completed) {
+                const data = JSON.parse(localStorage.getItem('gateDaTracker'));
+                data[subject][index].completed = completed;
+                localStorage.setItem('gateDaTracker', JSON.stringify(data));
+                updateProgressBar();
+            }
+            
+            // Delete topic
+            function deleteTopic(subject, index) {
+                const data = JSON.parse(localStorage.getItem('gateDaTracker'));
+                data[subject].splice(index, 1);
+                localStorage.setItem('gateDaTracker', JSON.stringify(data));
+                loadTrackerData();
+                updateProgressBar();
+            }
+            
+            // Add new topic
+            addTopicBtn.addEventListener('click', function() {
+                const subject = trackerSubject.value;
+                const topicName = prompt('Enter the topic name:');
+                
+                if (topicName && topicName.trim() !== '') {
+                    const data = JSON.parse(localStorage.getItem('gateDaTracker'));
+                    data[subject].push({
+                        name: topicName,
+                        completed: false
+                    });
+                    localStorage.setItem('gateDaTracker', JSON.stringify(data));
+                    loadTrackerData();
+                    updateProgressBar();
+                }
+            });
+            
+            // Reset tracker
+            resetTrackerBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to reset the tracker? This will delete all your progress.')) {
+                    localStorage.removeItem('gateDaTracker');
+                    initLocalStorage();
+                    loadTrackerData();
+                    updateProgressBar();
+                }
+            });
+            
+            // Update progress bar
+            function updateProgressBar() {
+                const data = JSON.parse(localStorage.getItem('gateDaTracker'));
+                let totalTopics = 0;
+                let completedTopicsCount = 0;
+                
+                for (const subject in data) {
+                    totalTopics += data[subject].length;
+                    completedTopicsCount += data[subject].filter(topic => topic.completed).length;
+                }
+                
+                const percentage = totalTopics > 0 ? Math.round((completedTopicsCount / totalTopics) * 100) : 0;
+                
+                overallProgress.style.width = `${percentage}%`;
+                completedTopics.textContent = completedTopicsCount;
+                progressPercentage.textContent = `${percentage}%`;
+            }
+            
+            // Load notes
+            function loadNotes() {
+                const subject = notesSubject.value;
+                const data = JSON.parse(localStorage.getItem('gateDaNotes'));
+                
+                if (data && data[subject] !== undefined) {
+                    notesContent.value = data[subject];
+                } else {
+                    notesContent.value = '';
+                }
+            }
+            
+            // Save notes
+            saveNotesBtn.addEventListener('click', function() {
+                const subject = notesSubject.value;
+                const content = notesContent.value;
+                
+                const data = JSON.parse(localStorage.getItem('gateDaNotes'));
+                data[subject] = content;
+                localStorage.setItem('gateDaNotes', JSON.stringify(data));
+                
+                alert('Notes saved successfully!');
+            });
+            
+            // Clear notes
+            clearNotesBtn.addEventListener('click', function() {
+                if (confirm('Are you sure you want to clear these notes?')) {
+                    notesContent.value = '';
+                    
+                    const subject = notesSubject.value;
+                    const data = JSON.parse(localStorage.getItem('gateDaNotes'));
+                    data[subject] = '';
+                    localStorage.setItem('gateDaNotes', JSON.stringify(data));
+                }
+            });
+            
+            // Notes subject change
+            notesSubject.addEventListener('change', loadNotes);
+            
+            // Tracker subject change
+            trackerSubject.addEventListener('change', loadTrackerData);
+            
+            // Generate calendar
+            function generateCalendar() {
+                const monthNames = [
+                    'January', 'February', 'March', 'April', 'May', 'June',
+                    'July', 'August', 'September', 'October', 'November', 'December'
+                ];
+                
+                calendarMonth.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+                
+                // Clear grid
+                calendarGrid.innerHTML = '';
+                
+                // Get first day of month
+                const firstDay = new Date(currentYear, currentMonth, 1).getDay();
+                
+                // Get number of days in month
+                const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate();
+                
+                // Get number of days in previous month
+                const daysInPrevMonth = new Date(currentYear, currentMonth, 0).getDate();
+                
+                // Get stored calendar data
+                const calendarData = JSON.parse(localStorage.getItem('gateDaCalendar'));
+                
+                // Add days from previous month
+                for (let i = firstDay - 1; i >= 0; i--) {
+                    const day = document.createElement('div');
+                    day.className = 'calendar-day different-month';
+                    
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = 'calendar-day-header';
+                    dayHeader.textContent = daysInPrevMonth - i;
+                    
+                    const dayContent = document.createElement('div');
+                    dayContent.className = 'calendar-day-content';
+                    
+                    day.appendChild(dayHeader);
+                    day.appendChild(dayContent);
+                    calendarGrid.appendChild(day);
+                }
+                
+                // Add days of current month
+                for (let i = 1; i <= daysInMonth; i++) {
+                    const day = document.createElement('div');
+                    day.className = 'calendar-day';
+                    
+                    // Check if it's today
+                    const today = new Date();
+                    if (today.getDate() === i && today.getMonth() === currentMonth && today.getFullYear() === currentYear) {
+                        day.classList.add('today');
+                    }
+                    
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = 'calendar-day-header';
+                    
+                    const dateSpan = document.createElement('span');
+                    dateSpan.textContent = i;
+                    dayHeader.appendChild(dateSpan);
+                    
+                    const addBtn = document.createElement('span');
+                    addBtn.innerHTML = '<i class="fas fa-plus text-xs text-gray-500 cursor-pointer"></i>';
+                    addBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        openTaskModal(`${currentYear}-${currentMonth + 1}-${i}`);
+                    });
+                    dayHeader.appendChild(addBtn);
+                    
+                    const dayContent = document.createElement('div');
+                    dayContent.className = 'calendar-day-content';
+                    
+                    // Add events for this day
+                    const dateString = `${currentYear}-${currentMonth + 1}-${i}`;
+                    if (calendarData && calendarData[dateString]) {
+                        calendarData[dateString].forEach(task => {
+                            const event = document.createElement('div');
+                            event.className = 'calendar-event';
+                            
+                            // Add phase class based on month
+                            if (currentMonth >= 3 && currentMonth <= 5) { // April - June
+                                event.classList.add('phase-1');
+                            } else if (currentMonth >= 6 && currentMonth <= 7) { // July - August
+                                event.classList.add('phase-2');
+                            } else if (currentMonth >= 8 && currentMonth <= 11) { // September - December
+                                event.classList.add('phase-3');
+                            } else if (currentMonth === 0) { // January
+                                event.classList.add('phase-4');
+                            }
+                            
+                            event.textContent = task.title;
+                            event.title = task.details || task.title;
+                            
+                            // Click to edit
+                            event.addEventListener('click', function(e) {
+                                e.stopPropagation();
+                                openTaskModal(dateString, task);
+                            });
+                            
+                            dayContent.appendChild(event);
+                        });
+                    }
+                    
+                    day.appendChild(dayHeader);
+                    day.appendChild(dayContent);
+                    calendarGrid.appendChild(day);
+                }
+                
+                // Add days from next month
+                const totalDaysDisplayed = firstDay + daysInMonth;
+                const remainingCells = 42 - totalDaysDisplayed; // 6 rows x 7 columns = 42 cells
+                
+                for (let i = 1; i <= remainingCells; i++) {
+                    const day = document.createElement('div');
+                    day.className = 'calendar-day different-month';
+                    
+                    const dayHeader = document.createElement('div');
+                    dayHeader.className = 'calendar-day-header';
+                    dayHeader.textContent = i;
+                    
+                    const dayContent = document.createElement('div');
+                    dayContent.className = 'calendar-day-content';
+                    
+                    day.appendChild(dayHeader);
+                    day.appendChild(dayContent);
+                    calendarGrid.appendChild(day);
+                }
+            }
+            
+            // Previous month
+            prevMonth.addEventListener('click', function() {
+                currentMonth--;
+                if (currentMonth < 0) {
+                    currentMonth = 11;
+                    currentYear--;
+                }
+                generateCalendar();
+            });
+            
+            // Next month
+            nextMonth.addEventListener('click', function() {
+                currentMonth++;
+                if (currentMonth > 11) {
+                    currentMonth = 0;
+                    currentYear++;
+                }
+                generateCalendar();
+            });
+            
+            // Open task modal
+            function openTaskModal(date, task = null) {
+                currentTaskDate = date;
+                taskDate.value = date;
+                
+                if (task) {
+                    taskTitle.value = task.title;
+                    taskDetails.value = task.details || '';
+                } else {
+                    taskTitle.value = '';
+                    taskDetails.value = '';
+                }
+                
+                taskModal.classList.add('active');
+            }
+            
+            // Save task
+            saveTaskBtn.addEventListener('click', function() {
+                const title = taskTitle.value.trim();
+                
+                if (title !== '') {
+                    const calendarData = JSON.parse(localStorage.getItem('gateDaCalendar')) || {};
+                    
+                    if (!calendarData[currentTaskDate]) {
+                        calendarData[currentTaskDate] = [];
+                    }
+                    
+                    // Check if editing existing task
+                    const existingTaskIndex = calendarData[currentTaskDate].findIndex(task => task.title === title);
+                    
+                    if (existingTaskIndex !== -1) {
+                        // Update existing task
+                        calendarData[currentTaskDate][existingTaskIndex] = {
+                            title: title,
+                            details: taskDetails.value
+                        };
+                    } else {
+                        // Add new task
+                        calendarData[currentTaskDate].push({
+                            title: title,
+                            details: taskDetails.value
+                        });
+                    }
+                    
+                    localStorage.setItem('gateDaCalendar', JSON.stringify(calendarData));
+                    generateCalendar();
+                    closeTaskModal();
+                } else {
+                    alert('Please enter a task title.');
+                }
+            });
+            
+            // Cancel task
+            cancelTaskBtn.addEventListener('click', closeTaskModal);
+            
+            // Close task modal
+            function closeTaskModal() {
+                taskModal.classList.remove('active');
+                currentTaskDate = null;
+            }
+            
+            // Log hours
+            logHoursBtn.addEventListener('click', function() {
+                const hours = parseInt(logHours.value);
+                const subject = logSubject.value;
+                
+                if (hours && hours > 0) {
+                    const data = JSON.parse(localStorage.getItem('gateDaHours'));
+                    data.total += hours;
+                    data.subjects[subject] += hours;
+                    
+                    localStorage.setItem('gateDaHours', JSON.stringify(data));
+                    updateHoursDisplay();
+                    
+                    logHours.value = '';
+                } else {
+                    alert('Please enter a valid number of hours.');
+                }
+            });
+            
+            // Update hours display
+            function updateHoursDisplay() {
+                const data = JSON.parse(localStorage.getItem('gateDaHours'));
+                
+                if (data) {
+                    totalHours.textContent = data.total;
+                    
+                    // Update progress bar
+                    const percentage = Math.min(Math.round((data.total / 936) * 100), 100);
+                    hoursProgress.style.width = `${percentage}%`;
+                    
+                    // Update subject hours
+                    subjectHours.innerHTML = '';
+                    
+                    for (const subject in data.subjects) {
+                        if (data.subjects[subject] > 0) {
+                            const subjectItem = document.createElement('div');
+                            subjectItem.className = 'mt-1';
+                            subjectItem.textContent = `${subject}: ${data.subjects[subject]} hours`;
+                            subjectHours.appendChild(subjectItem);
+                        }
+                    }
+                }
+            }
+            
+            // Add weekly goal
+            addGoalBtn.addEventListener('click', function() {
+                const goal = newGoal.value.trim();
+                
+                if (goal !== '') {
+                    const goals = JSON.parse(localStorage.getItem('gateDaGoals')) || [];
+                    goals.push({
+                        text: goal,
+                        completed: false
+                    });
+                    
+                    localStorage.setItem('gateDaGoals', JSON.stringify(goals));
+                    updateGoalsList();
+                    newGoal.value = '';
+                }
+            });
+            
+            // Update goals list
+            function updateGoalsList() {
+                const goals = JSON.parse(localStorage.getItem('gateDaGoals')) || [];
+                goalsList.innerHTML = '';
+                
+                goals.forEach((goal, index) => {
+                    const li = document.createElement('li');
+                    li.className = 'flex items-center';
+                    
+                    const checkbox = document.createElement('input');
+                    checkbox.type = 'checkbox';
+                    checkbox.checked = goal.completed;
+                    checkbox.className = 'mr-2';
+                    checkbox.addEventListener('change', function() {
+                        toggleGoalCompletion(index);
+                    });
+                    
+                    const span = document.createElement('span');
+                    span.textContent = goal.text;
+                    if (goal.completed) {
+                        span.className = 'line-through text-gray-500';
+                    }
+                    
+                    const deleteBtn = document.createElement('button');
+                    deleteBtn.className = 'ml-auto text-red-500';
+                    deleteBtn.innerHTML = '<i class="fas fa-times"></i>';
+                    deleteBtn.addEventListener('click', function() {
+                        deleteGoal(index);
+                    });
+                    
+                    li.appendChild(checkbox);
+                    li.appendChild(span);
+                    li.appendChild(deleteBtn);
+                    goalsList.appendChild(li);
+                });
+            }
+            
+            // Toggle goal completion
+            function toggleGoalCompletion(index) {
+                const goals = JSON.parse(localStorage.getItem('gateDaGoals'));
+                goals[index].completed = !goals[index].completed;
+                localStorage.setItem('gateDaGoals', JSON.stringify(goals));
+                updateGoalsList();
+            }
+            
+            // Delete goal
+            function deleteGoal(index) {
+                const goals = JSON.parse(localStorage.getItem('gateDaGoals'));
+                goals.splice(index, 1);
+                localStorage.setItem('gateDaGoals', JSON.stringify(goals));
+                updateGoalsList();
+            }
+            
+            // Initialize
+            initLocalStorage();
+            loadTrackerData();
+            updateProgressBar();
+            updateHoursDisplay();
+            updateGoalsList();
+            
+            // Create default calendar events for GATE preparation phases
+            function initializeCalendarEvents() {
+                const calendarData = JSON.parse(localStorage.getItem('gateDaCalendar'));
+                
+                // Only initialize if calendar is empty
+                if (!calendarData || Object.keys(calendarData).length === 0) {
+                    const newCalendarData = {};
+                    
+                    // Phase 1 start (April 1, 2025)
+                    newCalendarData['2025-4-1'] = [{
+                        title: 'Phase 1: Foundations Begin',
+                        details: 'Start your preparation with mathematical foundations. Focus on Probability, Statistics, Linear Algebra, and Calculus.'
+                    }];
+                    
+                    // Phase 2 start (July 1, 2025)
+                    newCalendarData['2025-7-1'] = [{
+                        title: 'Phase 2: Programming & DB Begin',
+                        details: 'Focus on Programming, Data Structures, Algorithms, and Database concepts.'
+                    }];
+                    
+                    // Phase 3 start (September 1, 2025)
+                    newCalendarData['2025-9-1'] = [{
+                        title: 'Phase 3: Advanced Topics Begin',
+                        details: 'Focus on Machine Learning and Artificial Intelligence concepts.'
+                    }];
+                    
+                    // Phase 4 start (January 1, 2026)
+                    newCalendarData['2026-1-1'] = [{
+                        title: 'Phase 4: Revision Begin',
+                        details: 'Focus on comprehensive revision and mock tests.'
+                    }];
+                    
+                    // GATE exam (approximate date - February 15, 2026)
+                    newCalendarData['2026-2-15'] = [{
+                        title: 'GATE DA 2026 Exam',
+                        details: 'Good luck! All your hard work will pay off today.'
+                    }];
+                    
+                    localStorage.setItem('gateDaCalendar', JSON.stringify(newCalendarData));
+                }
+            }
+            
+            initializeCalendarEvents();
+        });
+    </script>
+</body>
+</html>
