@@ -142,7 +142,7 @@ I've compiled an extensive list of free resources for each subject in the GATE D
 
 To help you monitor your progress, I've created a comprehensive GATE DA study tracker website. The tracker is accessible at:
 
-[GATE DA Study Tracker](https://page.genspark.site/page/toolu_01LHtBvd7zjkv44SKaLkJUDJ/gate_da_study_tracker.html)
+[GATE DA Study Tracker](https://mr-dark-debug.github.io/GATE-DA-2026-ROADMAP/)
 
 ### Key Features of the Tracker:
 
